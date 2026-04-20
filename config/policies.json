@@ -1,0 +1,95 @@
+{
+  "policySets": [
+    {
+      "id": "policy_standard",
+      "name": "Standard Corporate Policy",
+      "defaultAction": "ALLOW",
+      "rules": [
+        {
+          "id": "rule_cost_cap_daily",
+          "type": "cost_cap",
+          "priority": 10,
+          "action": "BLOCK",
+          "enabled": true,
+          "description": "Block requests if tenant has exceeded daily cost cap",
+          "config": {
+            "dailyCapUsd": 50.00
+          }
+        },
+        {
+          "id": "rule_model_whitelist",
+          "type": "model_restriction",
+          "priority": 20,
+          "action": "BLOCK",
+          "enabled": true,
+          "description": "Only allow approved models",
+          "config": {
+            "allowedModels": ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo", "claude-sonnet"]
+          }
+        },
+        {
+          "id": "rule_prompt_length",
+          "type": "prompt_length",
+          "priority": 30,
+          "action": "BLOCK",
+          "enabled": true,
+          "description": "Block requests exceeding maximum prompt size",
+          "config": {
+            "maxChars": 100000
+          }
+        },
+        {
+          "id": "rule_pii_ssn",
+          "type": "pii_detection",
+          "priority": 40,
+          "action": "BLOCK",
+          "enabled": true,
+          "description": "Block requests containing SSN patterns",
+          "config": {
+            "patterns": ["ssn", "credit_card"]
+          }
+        },
+        {
+          "id": "rule_content_filter",
+          "type": "content_filter",
+          "priority": 50,
+          "action": "BLOCK",
+          "enabled": true,
+          "description": "Block requests with prohibited content keywords",
+          "config": {
+            "keywords": ["jailbreak", "ignore previous instructions", "ignore all rules"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_permissive",
+      "name": "Dev Sandbox Policy",
+      "defaultAction": "ALLOW",
+      "rules": [
+        {
+          "id": "rule_dev_cost_cap",
+          "type": "cost_cap",
+          "priority": 10,
+          "action": "BLOCK",
+          "enabled": true,
+          "description": "Strict cost cap for dev sandbox",
+          "config": {
+            "dailyCapUsd": 5.00
+          }
+        },
+        {
+          "id": "rule_dev_model_restriction",
+          "type": "model_restriction",
+          "priority": 20,
+          "action": "BLOCK",
+          "enabled": true,
+          "description": "Dev sandbox limited to cheap models only",
+          "config": {
+            "allowedModels": ["gpt-3.5-turbo"]
+          }
+        }
+      ]
+    }
+  ]
+}

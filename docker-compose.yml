@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - TENANT_CONFIG_PATH=/app/config/tenants.json
+      - POLICY_CONFIG_PATH=/app/config/policies.json
+      - ADMIN_API_KEY=${ADMIN_API_KEY:-changeme-this-key-must-be-32-chars-min}
+      - REDIS_URL=redis://redis:6379
+      - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL:-}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_SERVICE_NAME=llm-gateway
+    volumes:
+      - ./config:/app/config:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # Optional: OpenTelemetry collector for traces
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8888:8888"   # Prometheus metrics
+    volumes:
+      - ./config/otel-collector.yml:/etc/otel-collector-config.yml:ro
+    command: ["--config=/etc/otel-collector-config.yml"]
+    restart: unless-stopped
+    profiles:
+      - observability  # only starts with: docker compose --profile observability up

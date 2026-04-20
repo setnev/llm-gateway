@@ -1,0 +1,46 @@
+name: Bug Report
+description: File a bug report for gateway behavior
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "## Bug Report — LLM Gateway"
+
+  - type: input
+    id: component
+    attributes:
+      label: Affected Component
+      description: "Which subsystem is affected?"
+      placeholder: "e.g. policy/engine.ts, proxy/handler.ts, tenant/rateLimiter.ts"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: "What is the observed behavior vs expected behavior?"
+      placeholder: |
+        Observed: The policy engine evaluates all 50 rules even after a BLOCK verdict.
+        Expected: Evaluation should short-circuit on first BLOCK (O(1) on deny).
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Create a policy set with 50 rules, first rule is a cost_cap BLOCK
+        2. Send a request with tenantDailySpendUsd > cap
+        3. Observe verdict.evaluatedRules = 50, expected = 1
+    validations:
+      required: true
+
+  - type: textarea
+    id: test
+    attributes:
+      label: Failing Test (if applicable)
+      description: "Paste the test case or the test name that covers this bug"
+      render: typescript
